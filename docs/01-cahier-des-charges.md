@@ -115,15 +115,27 @@ Filtres disponibles : **Année** (obligatoire), **Trimestre**, **Mois**,
 **Sabbat**, et **Classe** (Admin uniquement) :
 - KPIs : nombre de classes suivies, total membres, taux d'apprentissage moyen,
   meilleure classe.
-- Graphique de tendance : évolution mensuelle ou par sabbat du taux global.
-- Taux d'apprentissage par classe (graphique camembert **ECharts**).
+- Graphique de tendance : **deux séries** — évolution du taux d'apprentissage
+  (axe gauche, %) et nombre de membres 7/7 (axe droit, entier), mensuelle ou
+  par sabbat selon le filtre actif.
+- Taux d'apprentissage par classe (graphique camembert ECharts, moyenne
+  affichée au centre).
 - Top 5 des classes avec le meilleur taux d'apprentissage (barres horizontales).
 - Totaux généraux par question globale (toutes classes confondues).
 - Tableau détaillé par classe : membres, présents, absents, 7/7, taux présence,
   taux absence, taux apprentissage.
 
+**Règle importante** : seuls les appels avec statut **FAIT** sont pris en compte
+dans tous les calculs du dashboard (les appels NON_FAIT sont ignorés).
+
 L'Admin voit le dashboard global (toutes classes). Le Responsable voit un
 dashboard limité à sa propre classe.
+
+### 4.8 Liste des appels
+La liste des appels dispose des mêmes filtres que le dashboard : **Année**
+(obligatoire, même logique de défaut), **Trimestre**, **Mois**, **Sabbat**, et
+**Classe** (Admin uniquement). Les appels NON_FAIT et FAIT sont tous affichés
+(pas de filtre par statut dans la liste).
 
 ## 5. Contraintes techniques
 

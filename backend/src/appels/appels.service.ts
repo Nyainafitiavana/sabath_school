@@ -17,9 +17,10 @@ export class AppelsService {
     private realtime: RealtimeGateway,
   ) {}
 
-  async findAll(classeId?: string, trimestre?: number, mois?: number, sabbat?: Sabbat) {
+  async findAll(classeId?: string, annee?: number, trimestre?: number, mois?: number, sabbat?: Sabbat) {
     const where: any = {};
     if (classeId) where.classeId = classeId;
+    if (annee)    where.classe   = { registre: { annee } };
     if (trimestre) where.trimestre = trimestre;
     if (mois) where.mois = mois;
     if (sabbat) where.sabbat = sabbat;

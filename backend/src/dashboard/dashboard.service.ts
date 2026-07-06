@@ -30,7 +30,7 @@ interface FilterOpts {
 }
 
 function buildAppelWhere(opts: FilterOpts): any {
-  const w: any = {};
+  const w: any = { statut: 'FAIT' };
   if (opts.trimestre) w.trimestre = opts.trimestre;
   if (opts.mois)      w.mois      = opts.mois;
   if (opts.sabbat)    w.sabbat    = opts.sabbat;
@@ -154,29 +154,31 @@ export class DashboardService {
    *
    * sabbat filter applies to monthly views; ignored for sabbat axis when drilling a month.
    */
-  async getSerie(opts: FilterOpts): Promise<{ label: string; taux: number }[]> {
-    const computeTaux = async (extraWhere: any): Promise<number> => {
+  async getSerie(opts: FilterOpts): Promise<{ label: string; taux: number; nbSept7: number }[]> {
+    const computeStats = async (extraWhere: any): Promise<{ taux: number; nbSept7: number }> => {
       const baseWhere = buildAppelWhere(opts);
       const appels = await this.prisma.appel.findMany({
         where: { ...baseWhere, ...extraWhere },
         select: { id: true },
       });
-      if (!appels.length) return 0;
-      const stats = await this.prisma.presence.aggregate({
-        where: {
-          appelId: { in: appels.map((a) => a.id) },
-          present: true,
-          frequenceApprentissage: { not: null },
-        },
-        _avg: { frequenceApprentissage: true },
-      });
-      return stats._avg.frequenceApprentissage
+      if (!appels.length) return { taux: 0, nbSept7: 0 };
+      const ids = appels.map((a) => a.id);
+      const [stats, nbSept7] = await Promise.all([
+        this.prisma.presence.aggregate({
+          where: { appelId: { in: ids }, present: true, frequenceApprentissage: { not: null } },
+          _avg: { frequenceApprentissage: true },
+        }),
+        this.prisma.presence.count({
+          where: { appelId: { in: ids }, present: true, frequenceApprentissage: 7 },
+        }),
+      ]);
+      const taux = stats._avg.frequenceApprentissage
         ? Math.round((stats._avg.frequenceApprentissage / 7) * 100 * 10) / 10
         : 0;
+      return { taux, nbSept7 };
     };
 
     if (opts.mois) {
-      // Sabbat breakdown — ignore top-level sabbat filter for the axis itself
       const baseForAxis = buildAppelWhere({ ...opts, sabbat: undefined });
       const allSabbats = ['SABBAT_1', 'SABBAT_2', 'SABBAT_3', 'SABBAT_4', 'SABBAT_5'] as Sabbat[];
       const results = await Promise.all(
@@ -185,22 +187,22 @@ export class DashboardService {
             where: { ...baseForAxis, mois: opts.mois, sabbat: s },
           });
           if (count === 0) return null;
-          return { label: SABBAT_LABELS[s], taux: await computeTaux({ mois: opts.mois, sabbat: s }) };
+          const { taux, nbSept7 } = await computeStats({ mois: opts.mois, sabbat: s });
+          return { label: SABBAT_LABELS[s], taux, nbSept7 };
         }),
       );
-      return results.filter(Boolean) as { label: string; taux: number }[];
+      return results.filter(Boolean) as { label: string; taux: number; nbSept7: number }[];
     }
 
-    // Monthly view — always return ALL months of the context (taux=0 if no data)
     const moisList = opts.trimestre
       ? (TRIMESTRE_MOIS[opts.trimestre] ?? [])
       : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
     return Promise.all(
-      moisList.map(async (m) => ({
-        label: MOIS_LABELS[m],
-        taux: await computeTaux({ mois: m }),
-      })),
+      moisList.map(async (m) => {
+        const { taux, nbSept7 } = await computeStats({ mois: m });
+        return { label: MOIS_LABELS[m], taux, nbSept7 };
+      }),
     );
   }
 }

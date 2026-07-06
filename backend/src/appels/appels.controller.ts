@@ -20,12 +20,14 @@ export class AppelsController {
   @Get()
   findAll(
     @Query('classeId') classeId?: string,
+    @Query('annee') annee?: string,
     @Query('trimestre') trimestre?: string,
     @Query('mois') mois?: string,
     @Query('sabbat') sabbat?: Sabbat,
   ) {
     return this.service.findAll(
       classeId,
+      annee ? parseInt(annee) : undefined,
       trimestre ? parseInt(trimestre) : undefined,
       mois ? parseInt(mois) : undefined,
       sabbat,

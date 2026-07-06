@@ -156,7 +156,7 @@ frontend/
 ### Appels
 | Méthode | Route | Rôle | Description |
 |---|---|---|---|
-| GET | `/appels?classeId=&trimestre=&mois=&sabbat=` | ADMIN, RESPONSABLE | Liste filtrée |
+| GET | `/appels?classeId=&annee=&trimestre=&mois=&sabbat=` | ADMIN, RESPONSABLE | Liste filtrée (`annee` filtre via `classe.registre.annee`) |
 | POST | `/appels` | ADMIN, RESPONSABLE | Créer (retourne erreur avec `existingId` si doublon) |
 | GET | `/appels/:id` | ADMIN, RESPONSABLE | Détail (presences + reponses + utilisateurs) |
 | PATCH | `/appels/:id` | ADMIN, RESPONSABLE | Enregistrer présences + réponses + statut |
@@ -198,7 +198,10 @@ frontend/
   groupé par `questionId`, filtré par les filtres actifs.
 - **Série temporelle** (`/dashboard/serie`) : agrégation par mois (si pas de
   filtre mois) ou par sabbat (si mois sélectionné) — retourne des points
-  `{ label, taux }` pour le graphique de tendance.
+  `{ label, taux, nbSept7 }` pour le graphique de tendance double-axe.
+- **Filtre FAIT** : toutes les agrégations du dashboard (`/dashboard` et
+  `/dashboard/serie`) ignorent les appels avec `statut = NON_FAIT` — seuls
+  les appels **FAIT** sont comptés.
 - Toutes ces agrégations sont calculées **côté backend** pour éviter de
   renvoyer toutes les lignes brutes.
 

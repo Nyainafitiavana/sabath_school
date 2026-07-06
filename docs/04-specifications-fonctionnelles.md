@@ -38,10 +38,16 @@
 - **Classe** (Admin uniquement, optionnel — "Toutes les classes").
 
 ### Blocs d'affichage
+Tous les blocs n'incluent que les appels avec statut **FAIT** (les appels
+NON_FAIT sont exclus de tous les calculs).
+
 - **4 KPI cards** : Classes suivies, Total membres, Taux moyen, Top classe.
-- **Graphique de tendance** (ECharts `LineChart`) : évolution mensuelle ou
-  par sabbat (selon le filtre mois) du taux global d'apprentissage.
-- **Camembert** (ECharts `PieChart`) : taux d'apprentissage par classe.
+- **Graphique de tendance** (ECharts `LineChart`, double axe Y) :
+  - Axe gauche (%) : taux d'apprentissage global, mensuel ou par sabbat.
+  - Axe droit (entier) : nombre total de membres 7/7 sur la même période.
+  - Les labels "0" et "0%" sont masqués pour éviter la superposition.
+- **Camembert** (ECharts `PieChart`) : taux d'apprentissage par classe,
+  moyenne globale affichée au centre du donut.
 - **Barres horizontales** (ECharts `BarChart`) : Top 5 classes.
 - **Totaux questions globales** : une carte chiffrée par question.
 - **Tableau détaillé** par classe : membres, présents, absents, 7/7,
@@ -114,7 +120,10 @@
 
 ### Barre d'actions
 - **Fixe en bas sur mobile**, statique sur desktop.
-- Bouton "Enregistrer" (statut inchangé) + bouton "Marquer comme FAIT".
+- Bouton "Enregistrer" (statut inchangé).
+- Si statut `NON_FAIT` : bouton "Marquer comme FAIT".
+- Si statut `FAIT` : bouton "Marquer comme NON FAIT" (amber) — permet de
+  revenir en arrière sans supprimer l'appel ni ses données.
 - Chaque bouton ouvre un modal de confirmation avant enregistrement.
 - Après enregistrement réussi : indicateur "✓ Enregistré" temporaire.
 
@@ -123,8 +132,17 @@
 
 ## 8. Écran : Liste des appels (ADMIN + RESPONSABLE)
 
-- Tableau : Classe, Trimestre, Mois, Sabbat, Statut, Membres, actions.
-- Filtre par classe (Admin uniquement).
+### Filtres
+Mêmes règles que le dashboard :
+- **Année** (obligatoire, défaut = année courante ou la plus récente avec des registres).
+- **Trimestre** (optionnel — Tous les trimestres).
+- **Mois** (optionnel, restreint aux mois du trimestre sélectionné).
+- **Sabbat** (optionnel — Tous les sabbats).
+- **Classe** (Admin uniquement, optionnel — Toutes les classes).
+
+### Tableau
+- Colonnes : Classe, Trimestre, Mois, Sabbat, Statut, Membres, actions.
+- Les appels NON_FAIT et FAIT sont tous affichés (pas de filtre par statut).
 - Clic sur ligne → écran de saisie de l'appel.
 - Suppression inline (icône poubelle) avec modal de confirmation.
 - Liste mise à jour en temps réel (Socket.IO `appel:created/updated/deleted`).

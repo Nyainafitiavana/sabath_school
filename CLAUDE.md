@@ -86,6 +86,12 @@ After each `appel` create/update/delete, the service calls `RealtimeGateway` whi
 
 **Learning frequency:** Stored as integer 1–7 (days/week), `null` when not provided (never 0). Dashboard taux = `avg(frequenceApprentissage / 7)` over **present** members only.
 
+**Dashboard FAIT-only:** `buildAppelWhere` in `dashboard.service.ts` always adds `statut: 'FAIT'` — NON_FAIT appels are invisible to all dashboard aggregations and the serie endpoint.
+
+**`GET /appels` filters:** `classeId`, `annee` (resolved via `classe.registre.annee`), `trimestre`, `mois`, `sabbat`. Appels list page uses same filter rules as dashboard (annee required, mois restricted by trimestre).
+
+**Serie response:** `{ label, taux, nbSept7 }` — TrendChart renders dual Y-axis (taux % left, nbSept7 count right).
+
 **1 RESPONSABLE = 1 class** (via `classeId` on Utilisateur), but a class can have multiple responsables.
 
 ## Key Constraints
